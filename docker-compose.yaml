@@ -1,0 +1,110 @@
+version: "3.5"
+
+services:
+    jaeger-collector:
+        container_name: jaeger-collector
+        image: jaegertracing/jaeger-collector:1.21
+        command: [
+        "--log-level=debug",
+        "--es.num-shards=1",
+        "--es.num-replicas=0", 
+        "--es.server-urls=http://elasticsearch:9200", 
+        "--collector.zipkin.host-port=:9411"
+        ]
+        ports:
+            - "14269"
+            - "9411:9411"
+            - 14250 # used by jaeger-agent to send spans in model.proto format
+            - 14268:14268 # can accept spans directly from clients in jaeger.thrift format over binary thrift protocol
+        environment:
+            - SPAN_STORAGE_TYPE=elasticsearch
+        restart: on-failure
+        depends_on:
+            - elasticsearch
+    
+    jaeger-agent: 
+        container_name: jaeger-agent
+        image: jaegertracing/jaeger-agent:1.21
+        command: [
+            "--reporter.grpc.host-port=jaeger-collector:14250",
+            "--log-level=debug",
+            "--reporter.grpc.retry.max=1000"
+        ]
+        ports:
+            - "5775:5775/udp"
+            - "6831:6831/udp"
+            - "6832:6832/udp"
+            - "5778:5778"
+        restart: on-failure
+        depends_on:
+            - jaeger-collector
+
+    jaeger-query:
+        container_name: jaeger-query
+        image: jaegertracing/jaeger-query:1.21
+        command: [
+            "--es.server-urls=http://elasticsearch:9200",
+            "--span-storage.type=elasticsearch",
+            "--log-level=debug",
+            "--query.max-clock-skew-adjustment=0s",
+        ]
+        ports:
+            - 16686:16686
+        restart: on-failure
+        environment:
+            SPAN_STORAGE_TYPE: "elasticsearch"
+    
+            # see here https://github.com/jaegertracing/jaeger/issues/2083#issuecomment-590291890
+            # choose one collector to assign in this.
+            # this used for jaeger query UI to send jaeger-query tracing spans directly to the collector.
+            # or you can leave this empty to disable any tracing
+            JAEGER_DISABLED: "false"
+            JAEGER_ENDPOINT: "http://jaeger-collector:14268/api/traces"
+        depends_on:
+            - elasticsearch
+
+    logstash:
+        image: docker.elastic.co/logstash/logstash:6.3.0
+        links:
+            - elasticsearch
+
+    elasticsearch:
+        container_name: elasticsearch
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.10.0
+        ports:
+            - 9200:9200
+            - 9300:9300
+        restart: on-failure
+        environment:
+            - discovery.type=single-node
+            - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
+    
+    kibana:
+        container_name: kibana
+        image: docker.elastic.co/kibana/kibana:7.10.0
+        ports:
+            - 5601:5601
+        environment:
+            ELASTICSEARCH_URL: http://elasticsearch:9200
+            ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+        depends_on:
+            - elasticsearch
+
+    mongodb-auth:
+        image: mongo:4.2.3-bionic
+        container_name: mongodb-auth
+        ports:
+            - 27017:27017
+
+    mongodb-product:
+        image: mongo:4.2.3-bionic
+        container_name: mongodb-product
+        ports:
+            - 27018:27017
+
+    mongodb-order:
+        image: mongo:4.2.3-bionic
+        container_name: mongodb-order
+        ports:
+            - 27019:27017
+      
