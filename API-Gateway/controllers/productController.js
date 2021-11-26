@@ -1,40 +1,59 @@
-const client = require("../grpc-client/Product/client")
+const host = "http://localhost:8081/product";
 
 module.exports.createProduct = async (req, res) => {
+  try {
     let newProduct = {
-        name: req.body.name
-    }
-    client.createProduct(newProduct, (error, product) => {
-        if (!error) {
-            return res.status(201).json({ message: "Product create success!", product: product })
-        } else {
-            console.log(error + " ");
-            return res.status(400).json(error + " ")
-        }
-    })
-}
+      name: req.body.name,
+    };
+
+    let options = {
+      uri: host + "createProduct",
+      body: JSON.stringify(newProduct),
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+    const response = await request(options);
+    res.status(200).json(response);
+  } catch (err) {
+    console.log(err + " ");
+    res.status(400).json(err + " ");
+  }
+};
 
 module.exports.getProductById = async (req, res) => {
-    productId = req.params.productId
-    console.log(productId)
-    client.getProductById({id: productId}, (error, product) => {
-        if (!error) {
-            return res.status(200).json({ product: product })
-        } else {
-            console.log(error + " ");
-            return res.status(400).json(error + " ")
-        }
-    })
-}
+  try {
+    productId = req.params.productId;
+    let options = {
+      uri: host + `getProductById/${productId}`,
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+    const response = await request(options);
+    res.status(200).json(response);
+  } catch (err) {
+    console.log(err + " ");
+    res.status(400).json(err + " ");
+  }
+};
 
 module.exports.getAllProduct = async (req, res) => {
-    console.log(1)
-    client.getAllProduct({}, (error, products) => {
-        if (!error) {
-            return res.status(201).json({ products: products })
-        } else {
-            console.log(error + " ");
-            return res.status(400).json(error + " ")
-        }
-    })
-}
+  console.log(1);
+  try {
+    let options = {
+      uri: host + "getAllProduct",
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+    const response = await request(options);
+    res.status(200).json(response);
+  } catch (err) {
+    console.log(err + " ");
+    res.status(400).json(err + " ");
+  }
+};

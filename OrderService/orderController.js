@@ -1,4 +1,4 @@
-const User = require("./userModel")
+const User = require("./orderModel")
 
 module.exports.createOrder = async (req, res) => {
     console.log(req.body)

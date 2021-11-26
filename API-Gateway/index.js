@@ -4,7 +4,7 @@ const logger = require("morgan");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const events = require('events');
-require("./initTracer")
+// require("./initTracer")
 
 const app = express()
 const port = 8080
