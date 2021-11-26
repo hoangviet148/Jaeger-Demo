@@ -1,6 +1,6 @@
 const grpcLibrary  = require('grpc')
 const protoLoader = require('@grpc/proto-loader');
-const PROTO_PATH = "/home/hoang/learning-distributed-tracing-101/lab-jaeger-nodejs/API-Gateway/grpc-client/Product/productService.proto"
+const PROTO_PATH = "/home/hoang/Jaeger-Demo/API-Gateway/grpc-client/Product/productService.proto"
 
 const packageDefinition = protoLoader.loadSync(PROTO_PATH, {});
 const ProductService = grpcLibrary.loadPackageDefinition(packageDefinition).ProductService

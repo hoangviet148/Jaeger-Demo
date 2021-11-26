@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 message Order {
-    string _id = 1;
+    string id = 1;
     string userId = 2;
     repeated string products = 3;
 }

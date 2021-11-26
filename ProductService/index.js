@@ -2,15 +2,16 @@ const grpc = require('grpc')
 const mongoose = require("mongoose");
 var ObjectId = require('mongodb').ObjectID;
 var protoLoader = require("@grpc/proto-loader");
+require("./initTracer")
 
 const app = new grpc.Server()
 const port = 8082
 const serviceName = 'Product Service'
 const Product = require("./productModel");
-const PROTO_PATH = "/home/hoang/learning-distributed-tracing-101/lab-jaeger-nodejs/ProductService/productService.proto"
+const PROTO_PATH = "/home/hoang/Jaeger-Demo/ProductService/productService.proto"
 
 let packageDefinition = protoLoader.loadSync(PROTO_PATH, {
-    
+
 })
 let productProto = grpc.loadPackageDefinition(packageDefinition);
 
@@ -29,7 +30,7 @@ mongoose.connect(
 );
 
 app.addService(productProto.ProductService.service, {
-    createProduct:async (call, callback) => {
+    createProduct: async (call, callback) => {
         console.log(call.request)
         let product = call.request;
         let newProduct = new Product({
@@ -38,13 +39,13 @@ app.addService(productProto.ProductService.service, {
         await newProduct.save();
         callback(null, newProduct);
     },
-    getProductById:async (call, callback) => {
+    getProductById: async (call, callback) => {
         console.log(call.request)
-        let productId = call.request._id;
-        let product = await Product.findOne({"_id": new ObjectId(productId)})
+        let productId = call.request.id;
+        let product = await Product.findOne({ "_id": new ObjectId(productId) })
         callback(null, product);
     },
-    getAllProduct:async (_, callback) => {
+    getAllProduct: async (_, callback) => {
         let products = await Product.find()
         callback(null, { products })
     }

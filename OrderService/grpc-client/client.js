@@ -1,10 +1,9 @@
-const grpcLibrary  = require('grpc')
-const protoLoader = require('@grpc/proto-loader');
-const PROTO_PATH = "/home/hoang/learning-distributed-tracing-101/lab-jaeger-nodejs/OrderService/grpc-client/productService.proto"
+const caller  = require('grpc-caller')
+const PROTO_PATH = "/home/hoang/Jaeger-Demo/OrderService/grpc-client/productService.proto"
 
-const packageDefinition = protoLoader.loadSync(PROTO_PATH, {});
-const ProductService = grpcLibrary.loadPackageDefinition(packageDefinition).ProductService
-const client = new ProductService('localhost:8082', grpcLibrary.credentials.createInsecure())
+//const packageDefinition = protoLoader.loadSync(PROTO_PATH, {});
+//const ProductService = grpcLibrary.loadPackageDefinition(packageDefinition).ProductService
+const client = caller('localhost:8082', PROTO_PATH, 'ProductService')
 
 module.exports = client
 

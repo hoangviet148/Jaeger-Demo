@@ -93,18 +93,24 @@ services:
     mongodb-auth:
         image: mongo:4.2.3-bionic
         container_name: mongodb-auth
+        volumes: 
+            - ./API-Gateway/mongo-data:/data/db
         ports:
             - 27017:27017
 
     mongodb-product:
         image: mongo:4.2.3-bionic
         container_name: mongodb-product
+        volumes: 
+            - ./ProductService/mongo-data:/data/db
         ports:
             - 27018:27017
 
     mongodb-order:
         image: mongo:4.2.3-bionic
         container_name: mongodb-order
+        volumes: 
+            - ./OrderService/mongo-data:/data/db
         ports:
             - 27019:27017
       

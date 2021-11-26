@@ -3,12 +3,14 @@ const mongoose = require("mongoose");
 let ObjectId = require('mongodb').ObjectID;
 let protoLoader = require("@grpc/proto-loader");
 let client = require("./grpc-client/client");
+require("./initTracer")
+
 
 const app = new grpc.Server()
 const port = 8081
 const serviceName = 'Order Service'
 const Order = require("./orderModel");
-const PROTO_PATH = "/home/hoang/learning-distributed-tracing-101/lab-jaeger-nodejs/OrderService/orderService.proto"
+const PROTO_PATH = "/home/hoang/Jaeger-Demo/OrderService/orderService.proto"
 
 let packageDefinition = protoLoader.loadSync(PROTO_PATH, {})
 let orderProto = grpc.loadPackageDefinition(packageDefinition);
@@ -28,7 +30,7 @@ mongoose.connect(
 );
 
 app.addService(orderProto.OrderService.service, {
-    createOrder:async (call, callback) => {
+    createOrder: async (call, callback) => {
         console.log(call.request)
         let order = call.request;
         let newOrder = new Order({
@@ -38,26 +40,22 @@ app.addService(orderProto.OrderService.service, {
         await newOrder.save();
         callback(null, newOrder);
     },
-    getOrderByUserId:async (call, callback) => {
+    getOrderByUserId: async (call, callback) => {
         console.log(call.request)
         let userId = call.request.id;
-        let order = await Order.findOne({"userId": new ObjectId(userId)})
+        let order = await Order.findOne({ "userId": new ObjectId(userId) })
         let orderProducts = order.products
         let products = []
-        console.log(orderProducts)
+
         for (let i = 0; i < orderProducts.length; i++) {
-            client.getProductById({id: orderProducts[i]}, (error, product) => {
-                if(!error) {
-                    products.push(product)
-                } else {
-                    console.log(error + " ")
-                }
-            })
+            let temp = await client.getProductById({ id: orderProducts[i] })
+            console.log(temp)
+            products.push(temp)
         }
-     
-        callback(null, {products});
+        console.log(products)
+        callback(null, { products });
     },
-    getAllOrder:async (_, callback) => {
+    getAllOrder: async (_, callback) => {
         let orders = await Order.find()
         callback(null, { orders })
     }

@@ -22,11 +22,12 @@ module.exports.getOrderByUserId = async (req, res) => {
     console.log(userId)
     let user = await User.findOne({ "_id": userId })
     client.getOrderByUserId({ id: userId }, (error, order) => {
+        //console.log(JSON.parse(order.products[0]))
         if (!error) {
             return res.status(200).json({
                 orderId: order._id,
                 username: user.name,
-                products: order
+                products: order.products
             })
         } else {
             console.log(error + " ");
