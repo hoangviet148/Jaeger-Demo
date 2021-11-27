@@ -3,7 +3,8 @@ const bodyParser = require("body-parser");
 const logger = require("morgan");
 const cors = require("cors");
 const mongoose = require("mongoose");
-require("./initTracer");
+require("./tracer/initTracer")
+const tracingMiddleWare = require("./tracer/tracingMiddleware")
 
 const port = 8081;
 const serviceName = "Order Service";
@@ -23,6 +24,7 @@ app.use(
     exposedHeaders: "*",
   })
 );
+app.use(tracingMiddleWare)
 
 // Router
 app.use("/order", orderRoute);

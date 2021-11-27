@@ -4,12 +4,13 @@ const logger = require("morgan");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const events = require('events');
-// require("./initTracer")
+require("./tracer/initTracer")
 
 const app = express()
 const port = 8080
 const serviceName = 'API Gateway'
 
+const tracingMiddleWare = require("./tracer/tracingMiddleware")
 const authRoute = require("./routes/authRoute");
 const orderRoute = require("./routes/orderRoute");
 const productRoute = require("./routes/productRoute");
@@ -40,6 +41,8 @@ app.use(
     exposedHeaders: "*",
   })
 );
+
+app.use(tracingMiddleWare)
 
 // Router
 app.use("/", authRoute);

@@ -3,7 +3,8 @@ const bodyParser = require("body-parser");
 const logger = require("morgan");
 const cors = require("cors");
 const mongoose = require("mongoose");
-// require("./initTracer");
+require("./tracer/initTracer")
+const tracingMiddleWare = require("./tracer/tracingMiddleware")
 
 const port = 8082;
 const serviceName = "Product Service";
@@ -23,12 +24,13 @@ app.use(
     exposedHeaders: "*",
   })
 );
+app.use(tracingMiddleWare)
 
 // Router
 app.use("/product", productRoute);
 
 // Connect database
-const db = "mongodb://127.0.0.1:27019/test";
+const db = "mongodb://127.0.0.1:27018/test";
 mongoose.connect(
   db,
   { useNewUrlParser: true, useUnifiedTopology: true },

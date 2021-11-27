@@ -1,21 +1,15 @@
-const host = "http://localhost:8082/order";
+const axios = require("axios");
+const host = "http://localhost:8081/order";
 
 module.exports.createOrder = async (req, res) => {
   try {
-    let newOrder = {
-      name: req.body.name,
-    };
+    let url = host + "/createOrder";
 
-    let options = {
-      uri: host + "createOrder",
-      body: JSON.stringify(newOrder),
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    };
-    const response = await request(options);
-    res.status(200).json(response);
+    const response = await axios.post(url, {
+      userId: req.body.userId,
+      products: req.body.products,
+    });
+    res.status(200).json(response.data);
   } catch (err) {
     console.log(err + " ");
     res.status(400).json(err + " ");
@@ -26,16 +20,11 @@ module.exports.getOrderByUserId = async (req, res) => {
   try {
     let userId = req.params.userId;
     console.log(userId);
-    let user = await User.findOne({ _id: userId });
-    let options = {
-      uri: host + `getOrderByUserId/${userId}`,
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    };
-    const response = await request(options);
-    res.status(200).json(response);
+    let url = host + `/getOrderByUserId/${userId}`;
+
+    const response = await axios.get(url);
+    console.log(response.data)
+    res.status(200).json(response.data);
   } catch (err) {
     console.log(err + " ");
     res.status(400).json(err + " ");
@@ -44,15 +33,10 @@ module.exports.getOrderByUserId = async (req, res) => {
 
 module.exports.getAllOrder = async (req, res) => {
   try {
-    let options = {
-      uri: host + "getAllOrder",
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    };
-    const response = await request(options);
-    res.status(200).json(response);
+    let url = host + "/getAllOrder";
+
+    const response = await axios.get(url);
+    res.status(200).json(response.data);
   } catch (err) {
     console.log(err + " ");
     res.status(400).json(err + " ");
