@@ -42,6 +42,7 @@ app.use(
   })
 );
 
+// Instrument every incomming request
 app.use(tracingMiddleWare)
 
 // Router
@@ -49,10 +50,6 @@ app.use("/", authRoute);
 app.use("/order", orderRoute);
 app.use("/product", productRoute);
 
-//const initTracer = 
-
-// Instrument every incomming request
-// app.use(initTracer.tracingMiddleWare)
 
 app.disable('etag');
 let emitter = new events.EventEmitter();

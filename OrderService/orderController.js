@@ -1,7 +1,8 @@
 const Order = require("./orderModel");
 const ObjectId = require("mongodb").ObjectID;
 const axios = require("axios");
-
+const opentracing = require("opentracing");
+const tracer = opentracing.globalTracer();
 
 module.exports.createOrder = async (req, res) => {
   console.log(req.body);
@@ -14,23 +15,44 @@ module.exports.createOrder = async (req, res) => {
 };
 
 module.exports.getOrderByUserId = async (req, res) => {
-    console.log(req.params)
+  // You can re-use the parent span to create a child span
+  const span = tracer.startSpan("getOrderByUserId", { childOf: req.span });
+  try {
+    console.log(req.params);
     let userId = req.params.userId;
+    span.log({ event: "get product id from databases" });
     let order = await Order.findOne({ userId: new ObjectId(userId) });
     let orderProducts = order.products;
-    console.log("products: " + orderProducts)
-
-    let url = "http://localhost:8082/product/getProductById";
+    span.log({ event: "done get product id from databases" });throw "err";
+    console.log("products: " + orderProducts);
+    const headers = {};
+    tracer.inject(span, opentracing.FORMAT_HTTP_HEADERS, headers);
+    let urlTemp = "http://localhost:8082/product/getProductById";
     let products = [];
+    //throw "err"
     for (let i = 0; i < orderProducts.length; i++) {
-        console.log(url + '/' + orderProducts[i])
-      let temp = await axios.get(url + '/' + orderProducts[i]);
-      console.log("temp: " + temp.data)
+      // if (i == 2) throw "test error";
+      let url = urlTemp + "/" + orderProducts[i];
+      console.log(url);
+      span.log({ event: `call to product service to get ${orderProducts[i]}` });
+      let temp = await axios.get(url, {
+        headers: headers,
+      });
+      span.log({
+        event: `done call to product service to get ${orderProducts[i]}`,
+      });
+      console.log("temp: " + temp.data);
       products.push(temp.data);
     }
-    console.log(products)
+    console.log(products);
+    span.finish();
     res.json({ products });
-  
+  } catch (err) {
+    span.log({ event: 'error at getOrderByUserId span' });
+    span.setTag(opentracing.Tags.ERROR, true);
+    span.finish()
+    return res.status(400).json({ err });
+  }
 };
 
 module.exports.getAllOrder = async (req, res) => {

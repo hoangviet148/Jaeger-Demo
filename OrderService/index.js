@@ -4,6 +4,8 @@ const logger = require("morgan");
 const cors = require("cors");
 const mongoose = require("mongoose");
 require("./tracer/initTracer")
+const events = require('events');
+
 const tracingMiddleWare = require("./tracer/tracingMiddleware")
 
 const port = 8081;
@@ -42,5 +44,7 @@ mongoose.connect(
     }
   }
 );
-
+let emitter = new events.EventEmitter();
+emitter.setMaxListeners(0)
+process.setMaxListeners(0)
 app.listen(port, () => console.log(`Service ${serviceName} listening on port ${port}!`))

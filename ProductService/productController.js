@@ -1,5 +1,7 @@
 const Product = require("./productModel");
 const ObjectId = require("mongodb").ObjectID;
+const opentracing = require("opentracing");
+const tracer = opentracing.globalTracer();
 
 module.exports.createProduct = async (req, res) => {
   console.log("Product Service - createProduct");
@@ -11,9 +13,21 @@ module.exports.createProduct = async (req, res) => {
 };
 
 module.exports.getProductById = async (req, res) => {
-  productId = req.params.productId;
-  let product = await Product.findOne({ _id: new ObjectId(productId) });
-  return res.json({ product });
+  const span = tracer.startSpan("getProductById", { childOf: req.span });
+
+  try {
+    span.log({ event: `get product by id from database ` });
+    productId = req.params.productId;
+    
+    let product = await Product.findOne({ _id: new ObjectId(productId) });
+    span.log({ event: `done get product by id from database ` });
+    span.finish();
+    return res.json({ product });
+  } catch (err) {
+    console.log(err + " ");
+    span.finish();
+    return res.status(400).json({ err });
+  }
 };
 
 module.exports.getAllProduct = async (req, res) => {
