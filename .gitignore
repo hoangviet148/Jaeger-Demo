@@ -1,7 +1,10 @@
-/API-Gateway/node_modules
-/OrderService/node_modules
-/ProductService/node_modules
+/Nodejs/API-Gateway/node_modules
+/Nodejs/OrderService/node_modules
+/Nodejs/ProductService/node_modules
 
-/API-Gateway/mongo-data
-/OrderService/mongo-data
-/ProductService/mongo-data
+/Nodejs/API-Gateway/mongo-data
+/Nodejs/OrderService/mongo-data
+/Nodejs/ProductService/mongo-data
+
+/Spring/service-a/target
+/Spring/service-b/target
