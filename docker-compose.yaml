@@ -47,6 +47,7 @@ services:
             "--span-storage.type=elasticsearch",
             "--log-level=debug",
             "--query.max-clock-skew-adjustment=0s",
+            "--query.ui-config=/home/hoang/Jaeger-Demo/ui-config.json"
         ]
         ports:
             - 16686:16686
