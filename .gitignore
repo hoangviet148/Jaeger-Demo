@@ -9,5 +9,7 @@
 /Spring/service-a/target
 /Spring/service-b/target
 
-/Java/*
-!/Java/examples
+/Java/Service-1/build
+/Java/Service-1/.gradle
+/Java/Service-2/build
+/Java/Service-2/.gradle
