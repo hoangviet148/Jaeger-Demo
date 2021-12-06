@@ -5,7 +5,7 @@ const initTracer = require('jaeger-client').initTracer;
 const config = {
     serviceName: serviceName,
     reporter: {
-        collectorEndpoint: 'http://localhost:14268/api/traces',
+        collectorEndpoint: 'http://jaeger-collector:14268/api/traces',
     }
 }
 let options = {

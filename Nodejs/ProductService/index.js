@@ -6,7 +6,7 @@ const mongoose = require("mongoose");
 require("./tracer/initTracer")
 const tracingMiddleWare = require("./tracer/tracingMiddleware")
 
-const port = 8082;
+const port = 8083;
 const serviceName = "Product Service";
 
 const app = express();
@@ -30,7 +30,7 @@ app.use(tracingMiddleWare)
 app.use("/product", productRoute);
 
 // Connect database
-const db = "mongodb://127.0.0.1:27018/test";
+const db = "mongodb://mongodb-product:27017/product";
 mongoose.connect(
   db,
   { useNewUrlParser: true, useUnifiedTopology: true },

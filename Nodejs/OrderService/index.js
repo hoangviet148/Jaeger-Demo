@@ -8,7 +8,7 @@ const events = require('events');
 
 const tracingMiddleWare = require("./tracer/tracingMiddleware")
 
-const port = 8081;
+const port = 8082;
 const serviceName = "Order Service";
 
 const app = express();
@@ -32,7 +32,7 @@ app.use(tracingMiddleWare)
 app.use("/order", orderRoute);
 
 // Connect database
-const db = "mongodb://127.0.0.1:27019/test";
+const db = "mongodb://mongodb-order:27017/order";
 mongoose.connect(
   db,
   { useNewUrlParser: true, useUnifiedTopology: true },

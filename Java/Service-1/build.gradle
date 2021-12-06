@@ -56,5 +56,5 @@ sourceSets {
 
 application {
     // Define the main class for the application.
-    mainClassName = 'com.Client'
+    mainClassName = 'com.App'
 }

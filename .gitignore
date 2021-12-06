@@ -6,8 +6,8 @@
 /Nodejs/OrderService/mongo-data
 /Nodejs/ProductService/mongo-data
 
-/Spring/service-a/target
-/Spring/service-b/target
+/Spring/build
+/Spring/.gradle
 
 /Java/Service-1/build
 /Java/Service-1/.gradle

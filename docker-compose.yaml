@@ -46,15 +46,14 @@ services:
             "--es.server-urls=http://elasticsearch:9200",
             "--span-storage.type=elasticsearch",
             "--log-level=debug",
-            "--query.max-clock-skew-adjustment=0s",
-            "--query.ui-config=/home/hoang/Jaeger-Demo/ui-config.json"
-        ]
+            "--query.max-clock-skew-adjustment=0s"
+            ]
         ports:
             - 16686:16686
         restart: on-failure
         environment:
             SPAN_STORAGE_TYPE: "elasticsearch"
-    
+            COLLECTOR_ZIPKIN_HOST_PORT: 9412
             # see here https://github.com/jaegertracing/jaeger/issues/2083#issuecomment-590291890
             # choose one collector to assign in this.
             # this used for jaeger query UI to send jaeger-query tracing spans directly to the collector.
@@ -64,10 +63,10 @@ services:
         depends_on:
             - elasticsearch
 
-    logstash:
-        image: docker.elastic.co/logstash/logstash:6.3.0
-        links:
-            - elasticsearch
+    # logstash:
+    #     image: docker.elastic.co/logstash/logstash:6.3.0
+    #     links:
+    #         - elasticsearch
 
     elasticsearch:
         container_name: elasticsearch
@@ -80,38 +79,98 @@ services:
             - discovery.type=single-node
             - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
     
-    kibana:
-        container_name: kibana
-        image: docker.elastic.co/kibana/kibana:7.10.0
+    # kibana:
+    #     container_name: kibana
+    #     image: docker.elastic.co/kibana/kibana:7.10.0
+    #     ports:
+    #         - 5601:5601
+    #     environment:
+    #         ELASTICSEARCH_URL: http://elasticsearch:9200
+    #         ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    #     depends_on:
+    #         - elasticsearch
+
+    spring:
+        container_name: spring-server
+        build:
+            context: ./Spring/docker
+            dockerfile: Dockerfile
         ports:
-            - 5601:5601
+            - "8080:8080"
         environment:
-            ELASTICSEARCH_URL: http://elasticsearch:9200
-            ELASTICSEARCH_HOSTS: http://elasticsearch:9200
-        depends_on:
-            - elasticsearch
+            JAEGER_AGENT_HOST: jaeger-agent
+            JAEGER_AGENT_PORT: 6831
+        depends_on: 
+            - jaeger-agent
+
+    api-gateway:
+        container_name: API-Gateway
+        build:
+            context: ./Nodejs/API-Gateway/
+            dockerfile: Dockerfile
+        volumes:
+          - ./Nodejs/API-Gateway:/app1
+        ports:
+            - "8081:8081"
+        environment:
+            JAEGER_AGENT_HOST: jaeger-agent
+            JAEGER_AGENT_PORT: 6831
+        depends_on: 
+            - jaeger-agent
+
+    
+    order-service:
+        container_name: OrderService
+        build:
+            context: ./Nodejs/OrderService/
+            dockerfile: Dockerfile
+        ports:
+            - "8082:8082"
+        volumes:
+          - ./Nodejs/OrderService:/app
+        environment:
+            JAEGER_AGENT_HOST: jaeger-agent
+            JAEGER_AGENT_PORT: 6831
+        depends_on: 
+            - jaeger-agent
+
+    product-service:
+        container_name: ProductService
+        build:
+            context: ./Nodejs/ProductService/
+            dockerfile: Dockerfile
+        ports:
+            - "8083:8083"
+        volumes:
+          - ./Nodejs/ProductService:/app
+        environment:
+            JAEGER_AGENT_HOST: jaeger-agent
+            JAEGER_AGENT_PORT: 6831
+        depends_on: 
+            - jaeger-agent
+
 
     mongodb-auth:
         image: mongo:4.2.3-bionic
         container_name: mongodb-auth
-        volumes: 
-            - ./API-Gateway/mongo-data:/data/db
+        # volumes: 
+        #     - ./Nodejs/API-Gateway/mongo-data:/data/db
         ports:
             - 27017:27017
 
     mongodb-product:
         image: mongo:4.2.3-bionic
         container_name: mongodb-product
-        volumes: 
-            - ./ProductService/mongo-data:/data/db
+        # volumes: 
+        #     - ./Nodejs/ProductService/mongo-data:/data/db
         ports:
             - 27018:27017
 
     mongodb-order:
         image: mongo:4.2.3-bionic
         container_name: mongodb-order
-        volumes: 
-            - ./OrderService/mongo-data:/data/db
+        # volumes: 
+        #     - ./Nodejs/OrderService/mongo-data:/data/db
         ports:
             - 27019:27017
       
