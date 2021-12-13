@@ -7,7 +7,7 @@ function initTracer(serviceName) {
     // Sampler set to const 1 to capture every request, do not do this for production
     serviceName: serviceName,
     reporter: {
-      collectorEndpoint: "http://localhost:14268/api/traces",
+      collectorEndpoint: "http://jaeger-collector:14268/api/traces",
     },
   };
   // Only for DEV the sampler will report every span

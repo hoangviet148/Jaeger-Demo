@@ -32,7 +32,7 @@ function tracingMiddleWare(req, res, next) {
       // Force the span to be collected for http errors
       span.setTag(opentracing.Tags.SAMPLING_PRIORITY, 1);
       // If error then set the span to error
-      span.setTag(opentracing.Tags.ERROR, true);
+      //span.setTag(opentracing.Tags.ERROR, true);
 
       // Response should have meaning info to futher troubleshooting
       span.log({ event: "error", message: res.statusMessage });

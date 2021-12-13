@@ -1,5 +1,5 @@
 const axios = require("axios");
-const host = "http://localhost:8081/order";
+const host = "http://localhost:8082/order";
 const opentracing = require("opentracing");
 const tracer = opentracing.globalTracer();
 
@@ -21,22 +21,28 @@ module.exports.createOrder = async (req, res) => {
 module.exports.getOrderByUserId = async (req, res) => {
   // You can re-use the parent span to create a child span
   const span = tracer.startSpan("getOrderByUserId", { childOf: req.span });
+  console.log("req.span: ", req.span._spanContext)
+  span.setTag(opentracing.Tags.PEER_SERVICE, "API Gateway");
   try {
     span.log({ event: "call to order service" });
     let userId = req.params.userId;
-    console.log(userId);
-    let url = host + `/getOrderByUserId/${userId}`;
+    // console.log(userId);
+    let orderURL = `http://order-service:8082/order/getOrderByUserId/${userId}`;
+    let employeeURL = 'http://spring:8080/api/tutorial/1.0/employees/1'
     const headers = {};
     tracer.inject(span, opentracing.FORMAT_HTTP_HEADERS, headers);
-    // const request = bent('string', headers)
-    const response = await axios.get(url, {
+    console.log("headers: ", headers)
+    const orderResponse = await axios.get(orderURL, {
       headers: headers,
     });
-    console.log(response.data);
+    // const employeeResponse = await axios.get(employeeURL, {
+    //   headers: headers,
+    // });
+    console.log(orderResponse.data);
     // span.setTag("response", response.data);
     span.log({ event: "received response from service" });
     span.finish();
-    res.status(200).json(response.data);
+    res.status(200).json(orderResponse.data);
   } catch (err) {
     span.finish();
     console.log(err + " ");

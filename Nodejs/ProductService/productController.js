@@ -14,7 +14,7 @@ module.exports.createProduct = async (req, res) => {
 
 module.exports.getProductById = async (req, res) => {
   const span = tracer.startSpan("getProductById", { childOf: req.span });
-
+  console.log("params: ", req.span);
   try {
     span.log({ event: `get product by id from database ` });
     productId = req.params.productId;

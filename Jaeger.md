@@ -1,11 +1,41 @@
-## 1. Qua mỗi service hết bn giây
-## 2. Qua mỗi service thì trạng thái thế nào, nếu lỗi cần rõ nguyên nhân lỗi, có cần khai báo cụ thể không hay theo giao thức
-- Lỗi cần tự định nghĩa qua code chứ không tự extract ra
-## 3. Tổ chức dữ liệu thế nào để thể hiện mối quan hệ trên UI
-## 4. Tần suất lấy mẫu request như thế nào cho phù hợp
-## 5. Có thể viết theo các func để hướng dẫn dev tích hợp vào code hay ko
-## 6. Giữa các giao thức thì khai báo các tham số đo có khác nhau không
-## 7. Định nghĩa lại lại span, khi nào tạo span, có phải trao đổi với dev không
-## 8. Chưa thể hiện được đầu về của service
+## Các khái niệm
 
-- Để có thể truyền span từ service này sang service kia thì phải extract span context ra và inject vào trong header của oubound request và gửi đi
+![](https://opentracing.io/img/OTHT_2.png)
+
+![](https://opentracing.io/img/OTHT_3.png)
+
+![](https://opentracing.io/img/overview-intro/tracing1_0.png)
+
+- Trace: Là một request trong hệ phân tán (tập hợp của nhiều span)
+- Span: 
+  - Là một phần của workflow, đại diện cho một đơn vị xử lý logic trong hệ thống. VD: thực hiện query vào db, thực hiện lời gọi đến một service khác, ...
+  - Mỗi span chứa:
+    - Operation name
+    - start time và finish time
+    - Tags: chứa thông tin về trace data (những giá trị tồn tại trong suốt span)
+    - Logs: capture lại những event trong span (debug)
+    - SpanContext: chứa traceID, spanID và các thông tin khác giúp quảng bá trace ra các service khác
+    ![](https://opentracing.io/img/overview:tracers/Extract.png)
+
+- Span Example 
+```
+    t=0            operation name: db_query               t=x
+
+     +-----------------------------------------------------+
+     | · · · · · · · · · ·    Span     · · · · · · · · · · |
+     +-----------------------------------------------------+
+
+Tags:
+- db.instance:"customers"
+- db.statement:"SELECT * FROM mytable WHERE foo='bar'"
+- peer.address:"mysql://127.0.0.1:3306/customers"
+
+Logs:
+- message:"Can't connect to mysql server on '127.0.0.1'(10061)"
+
+SpanContext:
+- trace_id:"abc123"
+- span_id:"xyz789"
+- Baggage Items:
+  - special_id:"vsid1738"
+```

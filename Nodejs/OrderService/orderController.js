@@ -17,27 +17,29 @@ module.exports.createOrder = async (req, res) => {
 module.exports.getOrderByUserId = async (req, res) => {
   // You can re-use the parent span to create a child span
   const span = tracer.startSpan("getOrderByUserId", { childOf: req.span });
+  console.log("req.span: ", req.span._spanContext)
+  span.setTag(opentracing.Tags.PEER_SERVICE, "Order Service");
   try {
-    console.log(req.params);
+    console.log("params: ", req.span);
     let userId = req.params.userId;
     span.log({ event: "get product id from databases" });
     let order = await Order.findOne({ userId: new ObjectId(userId) });
     let orderProducts = order.products;
-    span.log({ event: "done get product id from databases" });throw "err";
+    span.log({ event: "done get product id from databases" });
     console.log("products: " + orderProducts);
     const headers = {};
     tracer.inject(span, opentracing.FORMAT_HTTP_HEADERS, headers);
-    let urlTemp = "http://localhost:8082/product/getProductById";
+    let urlTemp = "http://product-service:8083/product/getProductById";
     let products = [];
     //throw "err"
     for (let i = 0; i < orderProducts.length; i++) {
-      // if (i == 2) throw "test error";
       let url = urlTemp + "/" + orderProducts[i];
       console.log(url);
       span.log({ event: `call to product service to get ${orderProducts[i]}` });
       let temp = await axios.get(url, {
         headers: headers,
       });
+      //let temp = await axios.get(url);
       span.log({
         event: `done call to product service to get ${orderProducts[i]}`,
       });
