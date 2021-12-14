@@ -8,6 +8,10 @@ import io.opentracing.Span;
 import io.opentracing.Tracer;
 import com.lib.Tracing;
 
+// https://opentracing.io/docs/overview/scopes-and-threading/
+// Flow giống với HelloManual nhưng thay vì truyền span như một tham số vào lời gọi
+// thì span được truyền thông qua Scope Manager
+
 public class HelloActive {
     private final Tracer tracer;
 
@@ -28,6 +32,8 @@ public class HelloActive {
     }
 
     private  String formatString(String helloTo) {
+        // không cần cú pháp asChildOf bởi function được gọi trong scope của span "say-hello"
+        // nên sẽ được tự hiểu là span con 
         Span span = tracer.buildSpan("formatString").start();
         try (Scope scope = tracer.scopeManager().activate(span)) {
             String helloStr = String.format("Hello, %s!", helloTo);

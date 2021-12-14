@@ -1,4 +1,4 @@
-package com.distributed_system;
+package com.baggage;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -32,14 +32,12 @@ public class Publisher extends Application<Configuration> {
 
         @GET
         public String format(@QueryParam("helloStr") String helloStr, @Context HttpHeaders httpHeaders) {
-            // khởi tạo span "publish" là con của span "printHello" do được gọi trong scope của span "printHello"
             Span span = Tracing.startServerSpan(tracer, httpHeaders, "publish");
             try (Scope scope = tracer.scopeManager().activate(span)) {
                 System.out.println(helloStr);
                 span.log(ImmutableMap.of("event", "println", "value", helloStr));
                 return "published";
             } finally {
-                // kết thúc span "publish"
                 span.finish();
             }
         }
@@ -53,7 +51,6 @@ public class Publisher extends Application<Configuration> {
     public static void main(String[] args) throws Exception {
         System.setProperty("dw.server.applicationConnectors[0].port", "8082");
         System.setProperty("dw.server.adminConnectors[0].port", "9082");
-
         new Publisher(Tracing.init("publisher")).run(args);
     }
 }

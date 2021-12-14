@@ -1,13 +1,4 @@
-package com.distributed_system;
-
-import com.google.common.collect.ImmutableMap;
-import io.dropwizard.Application;
-import io.dropwizard.Configuration;
-import io.dropwizard.setup.Environment;
-import io.opentracing.Scope;
-import io.opentracing.Span;
-import io.opentracing.Tracer;
-import com.lib.Tracing;
+package com.baggage;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -17,7 +8,18 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 
+import com.google.common.collect.ImmutableMap;
+
+import io.dropwizard.Application;
+import io.dropwizard.Configuration;
+import io.dropwizard.setup.Environment;
+import io.opentracing.Scope;
+import io.opentracing.Span;
+import io.opentracing.Tracer;
+import com.lib.Tracing;
+
 public class Formatter extends Application<Configuration> {
+
     private final Tracer tracer;
 
     private Formatter(Tracer tracer) {
@@ -30,18 +32,19 @@ public class Formatter extends Application<Configuration> {
 
         @GET
         public String format(@QueryParam("helloTo") String helloTo, @Context HttpHeaders httpHeaders) {
-            // khởi tạo span "format" là con của span "formatString" do được gọi trong scope của span "formatString"
-            Span span =  Tracing.startServerSpan(tracer, httpHeaders, "format");
+            Span span = Tracing.startServerSpan(tracer, httpHeaders, "format");
             try (Scope scope = tracer.scopeManager().activate(span)) {
-                String helloStr = String.format("Hello, %s!", helloTo);
+                String greeting = span.getBaggageItem("greeting");
+                if (greeting == null) {
+                    greeting = "Hello";
+                }
+                String helloStr = String.format("%s, %s!", greeting, helloTo);
                 span.log(ImmutableMap.of("event", "string-format", "value", helloStr));
                 return helloStr;
             } finally {
-                // kết thúc span "format"
                 span.finish();
             }
         }
-
     }
 
     @Override
@@ -52,7 +55,6 @@ public class Formatter extends Application<Configuration> {
     public static void main(String[] args) throws Exception {
         System.setProperty("dw.server.applicationConnectors[0].port", "8081");
         System.setProperty("dw.server.adminConnectors[0].port", "9081");
-
         new Formatter(Tracing.init("formatter")).run(args);
     }
 }

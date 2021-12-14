@@ -1,4 +1,4 @@
-package com.distributed_system;
+package com.baggage;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -15,6 +15,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class Hello {
+
     private final Tracer tracer;
     private final OkHttpClient client;
 
@@ -33,7 +34,7 @@ public class Hello {
             Tags.SPAN_KIND.set(activeSpan, Tags.SPAN_KIND_CLIENT);
             Tags.HTTP_METHOD.set(activeSpan, "GET");
             Tags.HTTP_URL.set(activeSpan, url.toString());
-            tracer.inject(activeSpan.context(), Format.Builtin.HTTP_HEADERS, new RequestBuilderCarrier(requestBuilder));
+            tracer.inject(activeSpan.context(), Format.Builtin.HTTP_HEADERS, Tracing.requestBuilderCarrier(requestBuilder));
 
             Request request = requestBuilder.build();
             Response response = client.newCall(request).execute();
@@ -50,56 +51,48 @@ public class Hello {
         }
     }
 
-    private void sayHello(String helloTo) {
-        // start span "say-hello"
+    private void sayHello(String helloTo, String greeting) {
         Span span = tracer.buildSpan("say-hello").start();
         try (Scope scope = tracer.scopeManager().activate(span)) {
             span.setTag("hello-to", helloTo);
+            span.setBaggageItem("greeting", greeting);
 
             String helloStr = formatString(helloTo);
             printHello(helloStr);
         } finally {
-            // kết thúc "say-hello" span
             span.finish();
         }
     }
 
     private String formatString(String helloTo) {
-        // bắt đầu span formatString là con của span "say-hello"
         Span span = tracer.buildSpan("formatString").start();
         try (Scope scope = tracer.scopeManager().activate(span)) {
-            // gọi service format
             String helloStr = getHttp(8081, "format", "helloTo", helloTo);
             span.log(ImmutableMap.of("event", "string-format", "value", helloStr));
             return helloStr;
         } finally {
-            // kết thúc span formatString
             span.finish();
         }
     }
 
     private void printHello(String helloStr) {
-        // bắt đầu span printHello là con của span "say-hello"
         Span span = tracer.buildSpan("printHello").start();
         try (Scope scope = tracer.scopeManager().activate(span)) {
             getHttp(8082, "publish", "helloStr", helloStr);
             span.log(ImmutableMap.of("event", "println"));
         } finally {
-            // kết thúc span printHello
             span.finish();
         }
     }
 
-
     public static void main(String[] args) {
-        if (args.length != 1) {
-            throw new IllegalArgumentException("Expecting one argument");
+        if (args.length != 2) {
+            throw new IllegalArgumentException("Expecting two arguments, helloTo and greeting");
         }
-
         String helloTo = args[0];
+        String greeting = args[1];
         try (Tracer tracer = Tracing.init("hello-world")) {
-            // khởi tạo trace
-            new Hello(tracer).sayHello(helloTo);
+            new Hello(tracer).sayHello(helloTo, greeting);
         }
     }
 }
