@@ -49,7 +49,17 @@ bash run.sh com.distributed_system.Hello Bryan
 
 ## package "baggage"
 - Quảng bá context trong môi trường phân tán
-- Sử dụng baggage để truyền data thông qua 
+- Sử dụng baggage để truyền data giữa các service 
+```
+- Formatter service
+bash run.sh com.distributed_system.Formatter server (run service)
+
+- Publisher service
+bash run.sh com.distributed_system.Publisher server (run service)
+
+- Call 2 service from main
+bash run.sh com.distributed_system.Hello Bryan Bonjour (thêm baggage là "Bonjour")
+```
 
 # 3. Tham khảo
 - https://www.katacoda.com/courses/opentracing
