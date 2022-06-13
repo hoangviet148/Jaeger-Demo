@@ -19,7 +19,10 @@
     ![](https://opentracing.io/img/overview-intro/tracing1_0.png)
 
 # 2. Cấu trúc source code
-## package "hello"
+
+- Request flow ở 3 phần giống nhau gồm: sayHello -> formatter -> printHello 
+
+## 2.1. package "hello"
 - Khởi tạo một Tracer
 - Tạo một trace đơn giản
 - Trace cụ thể một function
@@ -30,10 +33,15 @@ bash run.sh com.hello.HelloActive Bryan
 bash run.sh com.hello.HelloManual Bryan
 ``` 
 
-## package "distributed_system"
+- Ở package này có 2 ví dụ: 1vd sử dụng việc truyền span như tham số để tạo trace (HelloManual) và 1vd sử 
+  dụng Scope manager để tạo trace (HelloActive) (recommend sử dụng scope mânger)
+
+## 2.2. package "distributed_system"
 - Trace một request trong hệ thống nhiều services
 - Truyền context qua nhiều service sử dụng "Inject" và "Extract"
 - Sử dụng OpenTracing-recommended tags
+- Ở VD này thì 2 function formatter và printHello được tách ra thành 2 service
+
 ```
 - Formatter service
 bash run.sh com.distributed_system.Formatter server (run service)
@@ -47,9 +55,10 @@ curl "localhost:8082/publish?helloStr=hi%20there" (test service)
 bash run.sh com.distributed_system.Hello Bryan
 ```
 
-## package "baggage"
+## 2.3. package "baggage"
 - Quảng bá context trong môi trường phân tán
 - Sử dụng baggage để truyền data giữa các service 
+- Data dưới dạng key-value sẽ được truyền từ service này qua service khác thông qua baggage
 ```
 - Formatter service
 bash run.sh com.distributed_system.Formatter server (run service)

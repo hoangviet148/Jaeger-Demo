@@ -43,7 +43,7 @@ public class HelloManual {
     }
 
     private void printHello(Span rootSpan, String helloStr) {
-        // khởi tạo span "formatString" là con của span "say-hello"
+        // khởi tạo span "printHello" là con của span "say-hello"
         Span span = tracer.buildSpan("printHello").asChildOf(rootSpan).start();
         try {
             System.out.println(helloStr);
