@@ -1,0 +1,7 @@
+curl http://192.168.75.160:30183/sayHello/Carlos --trace-ascii
+curl -vs http://192.168.75.160:30183/sayHello/Carlos 2>&1 | sed '/^* /d; /bytes data]$/d; s/> //; s/< //'
+kubectl -n kubernetes-dashboard describe secret $(kubectl -n kubernetes-dashboard get secret | grep admin-user | awk '{print $1}')
+eyJhbGciOiJSUzI1NiIsImtpZCI6IjlycVR0dWtJRjV4M3Fna0JNOFpfSFhLVUpFUV9HZDBXZHhFNUZ2bU02QjQifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlcm5ldGVzLWRhc2hib2FyZCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJhZG1pbi11c2VyLXRva2VuLTdyYmsyIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6ImFkbWluLXVzZXIiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiI5ODhkOWNlZC1jMWYwLTRlZWUtYWI0OC02Mjg5NjNkYmM4ZjkiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6a3ViZXJuZXRlcy1kYXNoYm9hcmQ6YWRtaW4tdXNlciJ9.UCNKOPwpT3Q5SFKrsP28R4dBs2yy86fBOyVqFr5KGboHcCkE-x7-A2p2YLY2RRXZk4jd_RwFd50ZpYvreCj6vC4lPBxJqAc-xHGrFtuFBtZfp8AJUlY-Lf0bQT_Jalq2mNFoIPBaKcS8aaiRyBh6OkNdygK6UDRWNS_P9qVFSSaD9vtqUQhtFPAHcG9emQgj5mkPBmW0ddWktq3g-3QYjwIcFGXiR-d8MaPmQdoogGK0HhBQq8nt7EisqhynQBHuialHq87lxDAzfze6h32XsMB-E4NcBaWpUZZZUFPpVZxD_QPP6vctPY1VZF8CPY0MG-EJzK3BXmMnwfwrbpkOXA
+
+# change service type
+kubectl -n istio-system patch svc tracing -p '{"spec": {"type": "NodePort"}}'
